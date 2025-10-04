@@ -11,25 +11,46 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { FormEvent, useState } from "react";
+import { setAuth } from "@/lib/auth";
 import { toast } from "sonner";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
+
+const loginSchema = z.object({
+  uname: z.string().min(1, "Username is required"),
+  password: z.string().min(6, "Password must be at least 6 characters long"),
+});
 
 export default function LoginForm() {
-  const [formData, setFormData] = useState({
-    uname: ``,
-    password: ``,
+  const form = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      uname: ``,
+      password: ``,
+    },
   });
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleSubmit = async (values: z.infer<typeof loginSchema>) => {
     try {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(values),
       });
       console.log(res);
       const data = await res.json();
@@ -37,7 +58,8 @@ export default function LoginForm() {
         toast.error(data.error || "Invalid username or password");
         return;
       }
-      localStorage.setItem("user", JSON.stringify(data.user));
+      setAuth(data.token, data.user);
+      toast.success("Login successful!");
       window.location.href = "/dashboard";
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -62,26 +84,31 @@ export default function LoginForm() {
             </Button>
           </CardAction>
         </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="flex flex-col gap-6">
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-8"
+          >
             <CardContent>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-2">
-                  <Label htmlFor="uname">Username</Label>
-                  <Input
-                    id="uname"
-                    type="text"
-                    placeholder="xyz"
-                    required
-                    value={formData.uname}
-                    onChange={(e) =>
-                      setFormData({ ...formData, uname: e.target.value })
-                    }
+                  <FormField
+                    control={form.control}
+                    name="uname"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Username</FormLabel>
+                        <FormControl>
+                          <Input placeholder="xyz" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
                 <div className="grid gap-2">
                   <div className="flex items-center">
-                    <Label htmlFor="password">Password</Label>
+                    <FormLabel>Password</FormLabel>
                     <a
                       href="#"
                       className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
@@ -89,14 +116,36 @@ export default function LoginForm() {
                       Forgot your password?
                     </a>
                   </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    required
-                    value={formData.password}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
-                    }
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              type={showPassword ? "text" : "password"}
+                              placeholder="••••••••"
+                              {...field}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                              onClick={() => setShowPassword(!showPassword)}
+                            >
+                              {showPassword ? (
+                                <EyeOff className="h-4 w-4" />
+                              ) : (
+                                <Eye className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
               </div>
@@ -106,8 +155,8 @@ export default function LoginForm() {
                 Login
               </Button>
             </CardFooter>
-          </div>
-        </form>
+          </form>
+        </Form>
       </Card>
     </div>
   );

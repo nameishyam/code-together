@@ -10,26 +10,50 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { FormEvent, useState } from "react";
+import { setAuth } from "@/lib/auth";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
+
+const signupSchema = z.object({
+  uname: z.string().min(1, "Username is required"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters long"),
+});
 
 export default function SignupForm() {
-  const [formData, setFormData] = useState({
-    uname: ``,
-    email: ``,
-    password: ``,
+  const form = useForm<z.infer<typeof signupSchema>>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      uname: ``,
+      email: ``,
+      password: ``,
+    },
   });
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleSubmit = async (values: z.infer<typeof signupSchema>) => {
     try {
       const res = await fetch("/api/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(values),
       });
       console.log(res);
       const data = await res.json();
@@ -37,6 +61,7 @@ export default function SignupForm() {
         toast.error(data.error || "Username already exists");
         return;
       }
+      setAuth(data.token, data.user);
       toast.success("User created successfully!");
       window.location.href = "/dashboard";
     } catch (err: unknown) {
@@ -52,58 +77,90 @@ export default function SignupForm() {
     <div className="flex min-h-[80vh] items-center justify-center p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Create a new account</CardTitle>
+          <CardTitle>Create an account</CardTitle>
           <CardDescription>
-            Enter your email below to create a new account
+            Enter your details below to create a new account
           </CardDescription>
           <CardAction>
             <Button variant="link">
-              <a href="/login">Login</a>
+              <a href="/login">Log in</a>
             </Button>
           </CardAction>
         </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="flex flex-col gap-6">
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-8"
+          >
             <CardContent>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-2">
-                  <Label htmlFor="uname">Username</Label>
-                  <Input
-                    id="text"
-                    type="text"
-                    placeholder="xyz"
-                    required
-                    value={formData.uname}
-                    onChange={(e) =>
-                      setFormData({ ...formData, uname: e.target.value })
-                    }
+                  <FormField
+                    control={form.control}
+                    name="uname"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Username</FormLabel>
+                        <FormControl>
+                          <Input placeholder="xyz" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          This is your public display name.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="m@example.com"
-                    required
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input placeholder="xyz@example.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
                 <div className="grid gap-2">
                   <div className="flex items-center">
-                    <Label htmlFor="password">Password</Label>
+                    <FormLabel>Password</FormLabel>
                   </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    required
-                    value={formData.password}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
-                    }
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              type={showPassword ? "text" : "password"}
+                              placeholder="••••••••"
+                              {...field}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                              onClick={() => setShowPassword(!showPassword)}
+                            >
+                              {showPassword ? (
+                                <EyeOff className="h-4 w-4" />
+                              ) : (
+                                <Eye className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
               </div>
@@ -113,8 +170,8 @@ export default function SignupForm() {
                 Sign Up
               </Button>
             </CardFooter>
-          </div>
-        </form>
+          </form>
+        </Form>
       </Card>
     </div>
   );

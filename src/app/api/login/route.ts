@@ -1,5 +1,6 @@
 import { supabaseServer } from "@/lib/supabaseServer";
 import bcrypt from "bcryptjs";
+import { signToken } from "@/lib/jwt";
 
 export async function POST(req: Request) {
   try {
@@ -22,8 +23,13 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+    const token = signToken({ id: user.id, uname: user.uname });
     return new Response(
-      JSON.stringify({ message: "Login successful", user: { uname: user.uname, email: user.email } }),
+      JSON.stringify({
+        message: "Login successful",
+        token,
+        user: { uname: user.uname, email: user.email },
+      }),
       { status: 200 }
     );
   } catch (err: unknown) {
