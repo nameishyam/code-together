@@ -13,16 +13,39 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormEvent, useState } from "react";
+import { toast } from "sonner";
 
 export default function LoginForm() {
   const [formData, setFormData] = useState({
-    email: ``,
+    uname: ``,
     password: ``,
   });
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    console.log(formData);
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      console.log(res);
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Invalid username or password");
+        return;
+      }
+      localStorage.setItem("user", JSON.stringify(data.user));
+      window.location.href = "/dashboard";
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        toast.error(err.message);
+      } else {
+        toast.error("An unknown error occurred");
+      }
+    }
   };
 
   return (
@@ -31,7 +54,7 @@ export default function LoginForm() {
         <CardHeader>
           <CardTitle>Login to your account</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            Enter your username below to login to your account
           </CardDescription>
           <CardAction>
             <Button variant="link">
@@ -44,15 +67,15 @@ export default function LoginForm() {
             <CardContent>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="uname">Username</Label>
                   <Input
-                    id="email"
-                    type="email"
-                    placeholder="m@example.com"
+                    id="uname"
+                    type="text"
+                    placeholder="xyz"
                     required
-                    value={formData.email}
+                    value={formData.uname}
                     onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
+                      setFormData({ ...formData, uname: e.target.value })
                     }
                   />
                 </div>

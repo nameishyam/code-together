@@ -13,16 +13,39 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormEvent, useState } from "react";
+import { toast } from "sonner";
 
 export default function SignupForm() {
   const [formData, setFormData] = useState({
+    uname: ``,
     email: ``,
     password: ``,
   });
-
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    console.log(formData);
+    try {
+      const res = await fetch("/api/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      console.log(res);
+      const data = await res.json();
+      if (res.status === 400 || !res.ok) {
+        toast.error(data.error || "Username already exists");
+        return;
+      }
+      toast.success("User created successfully!");
+      window.location.href = "/dashboard";
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        toast.error(err.message);
+      } else {
+        toast.error("An unknown error occurred");
+      }
+    }
   };
 
   return (
@@ -43,6 +66,19 @@ export default function SignupForm() {
           <div className="flex flex-col gap-6">
             <CardContent>
               <div className="flex flex-col gap-6">
+                <div className="grid gap-2">
+                  <Label htmlFor="uname">Username</Label>
+                  <Input
+                    id="text"
+                    type="text"
+                    placeholder="xyz"
+                    required
+                    value={formData.uname}
+                    onChange={(e) =>
+                      setFormData({ ...formData, uname: e.target.value })
+                    }
+                  />
+                </div>
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
