@@ -63,7 +63,7 @@ export default function SignupForm() {
       }
       setAuth(data.token, data.user);
       toast.success("User created successfully!");
-      window.location.href = "/dashboard";
+      window.location.href = "/";
     } catch (err: unknown) {
       if (err instanceof Error) {
         toast.error(err.message);

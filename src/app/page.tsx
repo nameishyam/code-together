@@ -1,8 +1,26 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { isLoggedIn } from "@/lib/auth";
+import { toast } from "sonner";
 
 export default function Home() {
+  const handleSessionJoin = () => {
+    toast.error("Feature coming soon!");
+  };
+
   return (
     <div className="min-h-[80vh] bg-background">
       <div className="container mx-auto px-4 py-16">
@@ -48,27 +66,74 @@ export default function Home() {
         </div>
 
         <div className="text-center">
-          <p className="text-lg text-foreground mb-8">
-            Get started by creating a new session or joining an existing one!
-          </p>
-          <div className="flex gap-4 justify-center">
-            <Button
-              className="bg-primary text-primary-foreground px-8 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors border border-border"
-              onClick={() => {
-                window.location.href = "/login";
-              }}
-            >
-              Login
-            </Button>
-            <Button
-              className="bg-secondary text-secondary-foreground px-8 py-3 rounded-lg font-semibold hover:bg-secondary/80 transition-colors border border-border"
-              onClick={() => {
-                window.location.href = "/signup";
-              }}
-            >
-              Signup
-            </Button>
-          </div>
+          {isLoggedIn() ? (
+            <>
+              <p className="text-lg text-foreground mb-8">
+                Get started by creating a new session or joining an existing
+                one!
+              </p>
+              <div className="flex gap-4 justify-center">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline">Join Session</Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Join Session</DialogTitle>
+                      <DialogDescription>
+                        Enter the session code to join an existing coding
+                        session.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex items-center gap-2">
+                      <div className="grid flex-1 gap-2">
+                        <Label htmlFor="text" className="sr-only">
+                          Session Code
+                        </Label>
+                        <Input id="text" placeholder="••••••••" />
+                      </div>
+                    </div>
+                    <DialogFooter className="sm:justify-start">
+                      <DialogClose asChild>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          onClick={handleSessionJoin}
+                        >
+                          Enter
+                        </Button>
+                      </DialogClose>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+                <Button>Create Session</Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-lg text-foreground mb-8">
+                Get started by logging in or signing up!
+              </p>
+              <div className="flex gap-4 justify-center">
+                <Button
+                  className="bg-primary text-primary-foreground px-8 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors border border-border"
+                  onClick={() => {
+                    window.location.href = "/login";
+                  }}
+                >
+                  Login
+                </Button>
+                <Button
+                  className="bg-secondary text-secondary-foreground px-8 py-3 rounded-lg font-semibold hover:bg-secondary/80 transition-colors border border-border"
+                  onClick={() => {
+                    window.location.href = "/signup";
+                  }}
+                >
+                  Signup
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

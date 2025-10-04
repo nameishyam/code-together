@@ -60,7 +60,7 @@ export default function LoginForm() {
       }
       setAuth(data.token, data.user);
       toast.success("Login successful!");
-      window.location.href = "/dashboard";
+      window.location.href = "/";
     } catch (err: unknown) {
       if (err instanceof Error) {
         toast.error(err.message);
