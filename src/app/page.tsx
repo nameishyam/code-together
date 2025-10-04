@@ -21,6 +21,10 @@ export default function Home() {
     toast.error("Feature coming soon!");
   };
 
+  const handleSessionCreate = () => {
+    toast.error("Feature coming soon!");
+  };
+
   return (
     <div className="min-h-[80vh] bg-background">
       <div className="container mx-auto px-4 py-16">
@@ -106,7 +110,7 @@ export default function Home() {
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
-                <Button>Create Session</Button>
+                <Button onClick={handleSessionCreate}>Create Session</Button>
               </div>
             </>
           ) : (
