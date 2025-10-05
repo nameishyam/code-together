@@ -21,6 +21,9 @@ export const metadata: Metadata = {
   title: "Code Together",
   description:
     "Real-time collaborative code editor built with Next.js and WebSockets. Compiler support for multiple languages.",
+  icons: {
+    icon: "/code.svg",
+  },
 };
 
 export default async function RootLayout({
