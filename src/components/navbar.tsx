@@ -2,13 +2,17 @@
 
 import { ModeToggle } from "@/components/theme/ModeToggle";
 import { Button } from "@/components/ui/button";
-import { isLoggedIn } from "@/lib/auth";
+import { removeAuth } from "@/lib/auth";
 import { toast } from "sonner";
 
-export default function Navbar() {
+interface NavbarProps {
+  isLoggedIn: boolean;
+}
+
+export default function Navbar({ isLoggedIn }: NavbarProps) {
   const handleClick = () => {
-    if (isLoggedIn()) {
-      localStorage.clear();
+    if (isLoggedIn) {
+      removeAuth();
       window.location.href = "/login";
     } else {
       toast.error("You are not logged in");
@@ -26,7 +30,7 @@ export default function Navbar() {
         Code Together
       </button>
       <div className="flex items-center gap-2">
-        {isLoggedIn() ? (
+        {isLoggedIn ? (
           <Button
             className="hover:bg-red-600 dark:hover:bg-red-400"
             onClick={handleClick}

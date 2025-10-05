@@ -4,6 +4,8 @@ import { ThemeProvider } from "@/components/theme/theme-provider";
 import "./globals.css";
 import Navbar from "@/components/navbar";
 import { Toaster } from "@/components/ui/sonner";
+import { isServerLoggedIn } from "@/lib/auth-server";
+import ClientWrapper from "@/components/client-wrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,11 +23,13 @@ export const metadata: Metadata = {
     "Real-time collaborative code editor built with Next.js and WebSockets. Compiler support for multiple languages.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const isLoggedIn = await isServerLoggedIn();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -38,9 +42,11 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <nav>
-            <Navbar />
+            <Navbar isLoggedIn={isLoggedIn} />
           </nav>
-          <main>{children}</main>
+          <main>
+            <ClientWrapper isLoggedIn={isLoggedIn}>{children}</ClientWrapper>
+          </main>
           <Toaster />
         </ThemeProvider>
       </body>

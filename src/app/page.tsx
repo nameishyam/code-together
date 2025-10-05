@@ -13,10 +13,12 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { isLoggedIn } from "@/lib/auth";
+import { useAuth } from "@/components/client-wrapper";
 import { toast } from "sonner";
 
 export default function Home() {
+  const { isLoggedIn } = useAuth();
+
   const handleSessionJoin = () => {
     toast.error("Feature coming soon!");
   };
@@ -70,7 +72,7 @@ export default function Home() {
         </div>
 
         <div className="text-center">
-          {isLoggedIn() ? (
+          {isLoggedIn ? (
             <>
               <p className="text-lg text-foreground mb-8">
                 Get started by creating a new session or joining an existing

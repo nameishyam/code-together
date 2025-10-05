@@ -1,33 +1,25 @@
+import Cookies from "js-cookie";
+
 const TOKEN_KEY = "jwt_token";
 const USER_KEY = "user";
 
 export function setAuth(token: string, user: object) {
-  if (typeof window !== "undefined") {
-    localStorage.setItem(TOKEN_KEY, token);
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
-  }
+  Cookies.set(TOKEN_KEY, token, { expires: 7 });
+  Cookies.set(USER_KEY, JSON.stringify(user), { expires: 7 });
 }
 
 export function getToken(): string | null {
-  if (typeof window !== "undefined") {
-    return localStorage.getItem(TOKEN_KEY);
-  }
-  return null;
+  return Cookies.get(TOKEN_KEY) || null;
 }
 
 export function getUser(): unknown | null {
-  if (typeof window !== "undefined") {
-    const user = localStorage.getItem(USER_KEY);
-    return user ? JSON.parse(user) : null;
-  }
-  return null;
+  const user = Cookies.get(USER_KEY);
+  return user ? JSON.parse(user) : null;
 }
 
 export function removeAuth() {
-  if (typeof window !== "undefined") {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
-  }
+  Cookies.remove(TOKEN_KEY);
+  Cookies.remove(USER_KEY);
 }
 
 export function isLoggedIn(): unknown | null {

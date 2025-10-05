@@ -103,6 +103,7 @@ export default function LoginForm() {
         toast.error(data.error || "Invalid username or password");
         return;
       }
+      // CHANGED: This now stores in cookies instead of localStorage
       setAuth(data.token, data.user);
       toast.success("Login successful!");
       window.location.href = "/";
@@ -452,8 +453,14 @@ export default function LoginForm() {
                     />
                   </div>
                   <div className="grid gap-2">
-                    <div className="flex items-center">
+                    <div className="flex items-center justify-between">
                       <FormLabel>Password</FormLabel>
+                      <Button
+                        variant="link"
+                        onClick={() => setForgotPassword(true)}
+                      >
+                        Forgot Password?
+                      </Button>
                     </div>
                     <FormField
                       control={loginForm.control}
@@ -483,6 +490,7 @@ export default function LoginForm() {
                               </Button>
                             </div>
                           </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -496,6 +504,7 @@ export default function LoginForm() {
               </CardFooter>
             </form>
           </Form>
+          <div></div>
         </Card>
       )}
     </div>
