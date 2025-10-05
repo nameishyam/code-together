@@ -32,6 +32,7 @@ const signupSchema = z.object({
   uname: z.string().min(1, "Username is required"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters long"),
+  confirmPassword: z.string().min(1, "Please confirm your password"),
 });
 
 export default function SignupForm() {
@@ -41,6 +42,7 @@ export default function SignupForm() {
       uname: ``,
       email: ``,
       password: ``,
+      confirmPassword: ``,
     },
   });
 
@@ -48,17 +50,25 @@ export default function SignupForm() {
 
   const handleSubmit = async (values: z.infer<typeof signupSchema>) => {
     try {
+      if (values.password !== values.confirmPassword) {
+        toast.error("Passwords do not match");
+        return;
+      }
       const res = await fetch("/api/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify({
+          uname: values.uname,
+          email: values.email,
+          password: values.password,
+        }),
       });
       console.log(res);
       const data = await res.json();
       if (res.status === 400 || !res.ok) {
-        toast.error(data.error || "Username already exists");
+        toast.error(data.error || "Username or Email already exists");
         return;
       }
       setAuth(data.token, data.user);
@@ -90,7 +100,7 @@ export default function SignupForm() {
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-8"
+            className="space-y-4"
           >
             <CardContent>
               <div className="flex flex-col gap-6">
@@ -163,9 +173,45 @@ export default function SignupForm() {
                     )}
                   />
                 </div>
+                <div className="grid gap-2">
+                  <div className="flex items-center">
+                    <FormLabel>Confirm Password</FormLabel>
+                  </div>
+                  <FormField
+                    control={form.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              type={showPassword ? "text" : "password"}
+                              placeholder="••••••••"
+                              {...field}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                              onClick={() => setShowPassword(!showPassword)}
+                            >
+                              {showPassword ? (
+                                <EyeOff className="h-4 w-4" />
+                              ) : (
+                                <Eye className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
             </CardContent>
-            <CardFooter className="flex-col gap-2">
+            <CardFooter>
               <Button type="submit" className="w-full">
                 Sign Up
               </Button>

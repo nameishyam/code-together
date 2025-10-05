@@ -33,7 +33,8 @@ export async function POST(req: Request) {
       { status: 200 }
     );
   } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : "An unknown error occurred";
+    const errorMsg =
+      err instanceof Error ? err.message : "An unknown error occurred";
     return new Response(JSON.stringify({ error: errorMsg }), { status: 500 });
   }
 }
