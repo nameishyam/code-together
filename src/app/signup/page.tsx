@@ -92,7 +92,7 @@ export default function SignupForm() {
             Enter your details below to create a new account
           </CardDescription>
           <CardAction>
-            <Button variant="link">
+            <Button variant="link" className="hover:cursor-pointer">
               <a href="/login">Log in</a>
             </Button>
           </CardAction>
@@ -157,7 +157,7 @@ export default function SignupForm() {
                               type="button"
                               variant="ghost"
                               size="sm"
-                              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                              className="absolute right-0 top-0 h-full px-3 py-2 hover:cursor-pointer"
                               onClick={() => setShowPassword(!showPassword)}
                             >
                               {showPassword ? (
@@ -193,7 +193,7 @@ export default function SignupForm() {
                               type="button"
                               variant="ghost"
                               size="sm"
-                              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                              className="absolute right-0 top-0 h-full px-3 py-2 hover:cursor-pointer"
                               onClick={() => setShowPassword(!showPassword)}
                             >
                               {showPassword ? (
@@ -212,7 +212,7 @@ export default function SignupForm() {
               </div>
             </CardContent>
             <CardFooter>
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full hover:cursor-pointer">
                 Sign Up
               </Button>
             </CardFooter>

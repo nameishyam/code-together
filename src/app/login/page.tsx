@@ -103,7 +103,6 @@ export default function LoginForm() {
         toast.error(data.error || "Invalid username or password");
         return;
       }
-      // CHANGED: This now stores in cookies instead of localStorage
       setAuth(data.token, data.user);
       toast.success("Login successful!");
       window.location.href = "/";
@@ -315,7 +314,7 @@ export default function LoginForm() {
                                   type="button"
                                   variant="ghost"
                                   size="sm"
-                                  className="absolute right-0 top-0 h-full px-3 py-2"
+                                  className="absolute right-0 top-0 h-full px-3 py-2 hover:cursor-pointer"
                                   onClick={() =>
                                     setShowNewPassword(!showNewPassword)
                                   }
@@ -353,7 +352,7 @@ export default function LoginForm() {
                                   type="button"
                                   variant="ghost"
                                   size="sm"
-                                  className="absolute right-0 top-0 h-full px-3 py-2"
+                                  className="absolute right-0 top-0 h-full px-3 py-2 hover:cursor-pointer"
                                   onClick={() =>
                                     setShowConfirmPassword(!showConfirmPassword)
                                   }
@@ -381,7 +380,7 @@ export default function LoginForm() {
                     type="button"
                     onClick={handleSendEmail}
                     disabled={isLoading}
-                    className="w-full"
+                    className="w-full hover:cursor-pointer"
                   >
                     {isLoading ? "Sending..." : "Send OTP"}
                   </Button>
@@ -391,13 +390,17 @@ export default function LoginForm() {
                     type="button"
                     onClick={handleVerifyOtp}
                     disabled={isLoading}
-                    className="w-full"
+                    className="w-full hover:cursor-pointer"
                   >
                     {isLoading ? "Verifying..." : "Verify OTP"}
                   </Button>
                 )}
                 {otpVerified && (
-                  <Button type="submit" disabled={isLoading} className="w-full">
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full hover:cursor-pointer"
+                  >
                     {isLoading ? "Resetting..." : "Reset Password"}
                   </Button>
                 )}
@@ -406,6 +409,7 @@ export default function LoginForm() {
                   variant="link"
                   onClick={handleBackToLogin}
                   disabled={isLoading}
+                  className="hover:cursor-pointer"
                 >
                   Back to Login
                 </Button>
@@ -419,7 +423,7 @@ export default function LoginForm() {
             <CardTitle>Login</CardTitle>
             <CardDescription>Enter your username and password</CardDescription>
             <CardAction>
-              <Button variant="link">
+              <Button variant="link" className="hover:cursor-pointer">
                 <a href="/signup">Sign Up</a>
               </Button>
             </CardAction>
@@ -458,6 +462,7 @@ export default function LoginForm() {
                       <Button
                         variant="link"
                         onClick={() => setForgotPassword(true)}
+                        className="hover:cursor-pointer"
                       >
                         Forgot Password?
                       </Button>
@@ -478,7 +483,7 @@ export default function LoginForm() {
                                 type="button"
                                 variant="ghost"
                                 size="sm"
-                                className="absolute right-0 top-0 h-full px-3 py-2"
+                                className="absolute right-0 top-0 h-full px-3 py-2 hover:cursor-pointer"
                                 onClick={() => setShowPassword(!showPassword)}
                                 disabled={isLoading}
                               >
@@ -498,7 +503,11 @@ export default function LoginForm() {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button
+                  type="submit"
+                  className="w-full hover:cursor-pointer"
+                  disabled={isLoading}
+                >
                   {isLoading ? "Logging in..." : "Login"}
                 </Button>
               </CardFooter>

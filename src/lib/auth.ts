@@ -4,8 +4,8 @@ const TOKEN_KEY = "jwt_token";
 const USER_KEY = "user";
 
 export function setAuth(token: string, user: object) {
-  Cookies.set(TOKEN_KEY, token, { expires: 7 });
-  Cookies.set(USER_KEY, JSON.stringify(user), { expires: 7 });
+  Cookies.set(TOKEN_KEY, token, { expires: 0.04 });
+  Cookies.set(USER_KEY, JSON.stringify(user), { expires: 0.04 });
 }
 
 export function getToken(): string | null {
@@ -20,6 +20,7 @@ export function getUser(): unknown | null {
 export function removeAuth() {
   Cookies.remove(TOKEN_KEY);
   Cookies.remove(USER_KEY);
+  Cookies.remove("sessionId");
 }
 
 export function isLoggedIn(): unknown | null {

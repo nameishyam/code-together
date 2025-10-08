@@ -32,13 +32,16 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
       <div className="flex items-center gap-2">
         {isLoggedIn ? (
           <Button
-            className="hover:bg-red-600 dark:hover:bg-red-400"
+            className="hover:bg-red-600 dark:hover:bg-red-500 hover:cursor-pointer"
             onClick={handleClick}
           >
             Logout
           </Button>
         ) : (
-          <Button onClick={() => (window.location.href = "/login")}>
+          <Button
+            onClick={() => (window.location.href = "/login")}
+            className="hover: cursor-pointer"
+          >
             Login
           </Button>
         )}
