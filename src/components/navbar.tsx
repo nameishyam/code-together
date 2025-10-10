@@ -10,15 +10,6 @@ interface NavbarProps {
 }
 
 export default function Navbar({ isLoggedIn }: NavbarProps) {
-  const handleClick = () => {
-    if (isLoggedIn) {
-      removeAuth();
-      window.location.href = "/login";
-    } else {
-      toast.error("You are not logged in");
-    }
-  };
-
   return (
     <div className="w-full h-16 flex items-center justify-between px-4 border-b">
       <button
@@ -33,7 +24,14 @@ export default function Navbar({ isLoggedIn }: NavbarProps) {
         {isLoggedIn ? (
           <Button
             className="hover:bg-red-600 dark:hover:bg-red-500 hover:cursor-pointer"
-            onClick={handleClick}
+            onClick={() => {
+              if (isLoggedIn) {
+                removeAuth();
+                window.location.href = "/login";
+              } else {
+                toast.error("You are not logged in");
+              }
+            }}
           >
             Logout
           </Button>

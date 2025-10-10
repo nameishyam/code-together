@@ -15,16 +15,25 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/components/client-wrapper";
 import { toast } from "sonner";
+import Cookies from "js-cookie";
 
 export default function Home() {
   const { isLoggedIn } = useAuth();
 
-  const handleSessionJoin = () => {
-    toast.error("Feature coming soon!");
+  const handleSessionJoin = (sessionId: string) => {
+    window.location.href = `/dashboard/${sessionId}`;
   };
 
   const handleSessionCreate = () => {
-    toast.error("Feature coming soon!");
+    if (!isLoggedIn) {
+      toast.error("You must be logged in to create a session.");
+      return;
+    }
+    const sessionId = Array.from(crypto.getRandomValues(new Uint8Array(6)))
+      .map((n) => (n % 10).toString())
+      .join("");
+    Cookies.set("sessionId", sessionId);
+    window.location.href = `/dashboard/${sessionId}`;
   };
 
   return (
@@ -81,8 +90,11 @@ export default function Home() {
               <div className="flex gap-4 justify-center">
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button variant="outline">Join Session</Button>
+                    <Button variant="outline" className="hover: cursor-pointer">
+                      Join Session
+                    </Button>
                   </DialogTrigger>
+
                   <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                       <DialogTitle>Join Session</DialogTitle>
@@ -91,28 +103,46 @@ export default function Home() {
                         session.
                       </DialogDescription>
                     </DialogHeader>
-                    <div className="flex items-center gap-2">
-                      <div className="grid flex-1 gap-2">
-                        <Label htmlFor="text" className="sr-only">
-                          Session Code
-                        </Label>
-                        <Input id="text" placeholder="••••••••" />
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        const formData = new FormData(e.currentTarget);
+                        const sessionId = formData.get("sessionId") as string;
+                        handleSessionJoin(sessionId);
+                      }}
+                      className="flex flex-col gap-4"
+                    >
+                      <div className="grid gap-2">
+                        <Label htmlFor="sessionId">Session Code</Label>
+                        <Input
+                          id="sessionId"
+                          name="sessionId"
+                          placeholder="••••••••"
+                          required
+                        />
                       </div>
-                    </div>
-                    <DialogFooter className="sm:justify-start">
-                      <DialogClose asChild>
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          onClick={handleSessionJoin}
-                        >
-                          Enter
-                        </Button>
-                      </DialogClose>
-                    </DialogFooter>
+
+                      <DialogFooter className="sm:justify-start">
+                        <DialogClose asChild>
+                          <Button
+                            type="submit"
+                            variant="secondary"
+                            className="hover: cursor-pointer"
+                          >
+                            Enter
+                          </Button>
+                        </DialogClose>
+                      </DialogFooter>
+                    </form>
                   </DialogContent>
                 </Dialog>
-                <Button onClick={handleSessionCreate}>Create Session</Button>
+
+                <Button
+                  onClick={handleSessionCreate}
+                  className="hover: cursor-pointer"
+                >
+                  Create Session
+                </Button>
               </div>
             </>
           ) : (
@@ -122,7 +152,8 @@ export default function Home() {
               </p>
               <div className="flex gap-4 justify-center">
                 <Button
-                  className="bg-primary text-primary-foreground px-8 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors border border-border"
+                  className="hover: cursor-pointer"
+                  variant="outline"
                   onClick={() => {
                     window.location.href = "/login";
                   }}
@@ -130,7 +161,7 @@ export default function Home() {
                   Login
                 </Button>
                 <Button
-                  className="bg-secondary text-secondary-foreground px-8 py-3 rounded-lg font-semibold hover:bg-secondary/80 transition-colors border border-border"
+                  className="hover: cursor-pointer"
                   onClick={() => {
                     window.location.href = "/signup";
                   }}
