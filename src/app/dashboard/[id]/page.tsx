@@ -130,7 +130,6 @@ int main() {
           </Card>
         </div>
 
-        {/* Output column */}
         <div className="lg:col-span-1">
           <Card className="p-4 h-[60vh] flex flex-col">
             <div className="flex items-center justify-between mb-2">

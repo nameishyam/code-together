@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import type { editor } from "monaco-editor";
 
 const Editor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
 
@@ -42,6 +43,34 @@ export type MonacoEditorProps = {
   roomId?: string;
 };
 
+type RemoteCursor = {
+  x: number;
+  y: number;
+  color: string | null;
+  lastSeen: number;
+};
+
+type EditorCodeChangePayload = {
+  clientId: string;
+  code: string;
+};
+
+type CursorMovePayload = {
+  clientId: string;
+  x: number;
+  y: number;
+  color: string | null;
+};
+
+type CursorJoinPayload = {
+  clientId: string;
+  color: string | null;
+};
+
+type CursorDisconnectPayload = {
+  clientId: string;
+};
+
 export default function MonacoEditor({
   value,
   onChange,
@@ -54,7 +83,7 @@ export default function MonacoEditor({
   className,
   roomId,
 }: MonacoEditorProps) {
-  const editorRef = useRef<any>(null);
+  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const socketRef = useRef<Socket | null>(null);
   const clientIdRef = useRef<string | null>(null);
@@ -63,17 +92,10 @@ export default function MonacoEditor({
   const lastEmitRef = useRef<number>(0);
   const rafRef = useRef<number | null>(null);
 
-  type RemoteCursor = {
-    x: number;
-    y: number;
-    color: string | null;
-    lastSeen: number;
-  };
   const [remoteCursors, setRemoteCursors] = useState<
     Record<string, RemoteCursor>
   >({});
 
-  // --- Initialize clientId and color ---
   useEffect(() => {
     try {
       let saved = localStorage.getItem("mc:clientId");
@@ -89,8 +111,10 @@ export default function MonacoEditor({
     colorRef.current = `hsl(${h} 80% 50%)`;
   }, []);
 
-  // --- Editor mount ---
-  const handleEditorMount = (editor: any, monaco: any) => {
+  const handleEditorMount = (
+    editor: editor.IStandaloneCodeEditor,
+    monaco: typeof import("monaco-editor")
+  ) => {
     editorRef.current = editor;
     try {
       if (monaco?.editor?.setTheme) monaco.editor.setTheme("vs-dark");
@@ -99,12 +123,10 @@ export default function MonacoEditor({
     }
   };
 
-  // --- Handle local changes ---
   const handleChange = (v: string | undefined) => {
     if (!v) return;
     onChange(v);
 
-    // Skip emit if this is a remote update
     if (isRemoteUpdateRef.current) {
       isRemoteUpdateRef.current = false;
       return;
@@ -112,7 +134,6 @@ export default function MonacoEditor({
 
     if (!roomId || !socketRef.current?.connected) return;
 
-    // Emit every change immediately
     socketRef.current.emit("editor_code_change", {
       room: `dashboard:${roomId}:editor`,
       clientId: clientIdRef.current,
@@ -120,7 +141,6 @@ export default function MonacoEditor({
     });
   };
 
-  // --- Socket connection & handlers ---
   useEffect(() => {
     if (!roomId) return;
     let isActive = true;
@@ -147,38 +167,33 @@ export default function MonacoEditor({
         });
       });
 
-      // Remote code updates
-      socket.on(
-        "editor_code_change",
-        (payload: { clientId: string; code: string }) => {
-          if (!payload || payload.clientId === clientIdRef.current) return;
-          const editor = editorRef.current;
-          if (editor) {
-            isRemoteUpdateRef.current = true;
-            const model = editor.getModel();
-            if (model) {
-              const position = editor.getPosition();
-              if (editor.getValue() !== payload.code) {
-                isRemoteUpdateRef.current = true;
-                const model = editor.getModel();
-                if (model) {
-                  const pos = editor.getPosition();
-                  model.pushEditOperations(
-                    [],
-                    [{ range: model.getFullModelRange(), text: payload.code }],
-                    () => null
-                  );
-                  editor.setPosition(pos);
-                }
+      socket.on("editor_code_change", (payload: EditorCodeChangePayload) => {
+        if (!payload || payload.clientId === clientIdRef.current) return;
+        const editor = editorRef.current;
+        if (editor) {
+          isRemoteUpdateRef.current = true;
+          const model = editor.getModel();
+          if (model) {
+            const position = editor.getPosition();
+            if (editor.getValue() !== payload.code) {
+              isRemoteUpdateRef.current = true;
+              const model = editor.getModel();
+              if (model) {
+                const pos = editor.getPosition();
+                model.pushEditOperations(
+                  [],
+                  [{ range: model.getFullModelRange(), text: payload.code }],
+                  () => null
+                );
+                if (pos) editor.setPosition(pos);
               }
-              editor.setPosition(position);
             }
+            if (position) editor.setPosition(position);
           }
         }
-      );
+      });
 
-      // Cursor join/move/disconnect
-      socket.on("editor_cursor_move", (p: any) => {
+      socket.on("editor_cursor_move", (p: CursorMovePayload) => {
         if (!p?.clientId) return;
         setRemoteCursors((prev) => ({
           ...prev,
@@ -191,7 +206,7 @@ export default function MonacoEditor({
         }));
       });
 
-      socket.on("cursor_join", (p: any) => {
+      socket.on("cursor_join", (p: CursorJoinPayload) => {
         if (!p?.clientId) return;
         setRemoteCursors((prev) => ({
           ...prev,
@@ -204,13 +219,16 @@ export default function MonacoEditor({
         }));
       });
 
-      socket.on("cursor_disconnect", ({ clientId }: { clientId: string }) => {
-        setRemoteCursors((prev) => {
-          const copy = { ...prev };
-          delete copy[clientId];
-          return copy;
-        });
-      });
+      socket.on(
+        "cursor_disconnect",
+        ({ clientId }: CursorDisconnectPayload) => {
+          setRemoteCursors((prev) => {
+            const copy = { ...prev };
+            delete copy[clientId];
+            return copy;
+          });
+        }
+      );
     };
 
     setupSocket();
@@ -231,7 +249,6 @@ export default function MonacoEditor({
     };
   }, [roomId]);
 
-  // --- Mouse / cursor tracking ---
   const lastPosRef = useRef<{ x: number; y: number; ts: number } | null>(null);
 
   useEffect(() => {
@@ -277,7 +294,6 @@ export default function MonacoEditor({
     };
   }, [roomId]);
 
-  // --- Remove stale cursors ---
   useEffect(() => {
     const interval = setInterval(() => {
       const cutoff = Date.now() - 7000;
@@ -292,7 +308,6 @@ export default function MonacoEditor({
     return () => clearInterval(interval);
   }, []);
 
-  // --- Render ---
   return (
     <div className={cn("flex h-full flex-col", className)}>
       <div className="mb-3 flex flex-none items-center justify-between gap-3">
@@ -360,7 +375,6 @@ export default function MonacoEditor({
           theme="vs-dark"
         />
 
-        {/* Remote cursors overlay */}
         <div className="absolute inset-0 pointer-events-none">
           {Object.entries(remoteCursors).map(([id, cur]) => {
             const label = id.slice(0, 4);
