@@ -90,16 +90,17 @@ int main() {
     } catch {}
   }
 
-  const params = useParams();
-  const { id } = params;
+  const params = useParams<{ id: string }>();
+  const idParam = params?.id;
+  const roomId = Array.isArray(idParam) ? idParam[0] : idParam;
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-bold">Dashboard {id}</h1>
+      <h1 className="text-2xl font-bold">Dashboard {roomId ?? ""}</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <Card className="p-0">
-            <div className="flex items-center justify-between p-4 border-b">
+          <Card className="flex h-[70vh] flex-col overflow-hidden p-0">
+            <div className="flex items-center justify-between border-b p-4">
               <div className="font-medium">Editor</div>
               <div className="flex items-center gap-3">
                 <Button onClick={runCode} disabled={loading}>
@@ -107,8 +108,9 @@ int main() {
                 </Button>
               </div>
             </div>
-            <div className="p-4">
+            <div className="flex-1 overflow-hidden p-4">
               <MonacoEditor
+                roomId={roomId}
                 value={code}
                 onChange={setCode}
                 language={language}
@@ -122,7 +124,7 @@ int main() {
                 onFontSizeChange={setFontSize}
                 onSave={handleSave}
                 onReset={handleReset}
-                className="h-[60vh]"
+                className="h-full"
               />
             </div>
           </Card>

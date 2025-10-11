@@ -2,14 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 type SubmitBody = Record<string, unknown>;
 
-/**
- * Environment - read but don't assume they exist at compile time.
- * We'll validate at runtime and return sensible errors if missing.
- */
 const BASE =
   process.env.NEXT_JUDGE0_BASE_URL ?? process.env.NEXT_JUDGE0_BASE_URL; // kept for clarity
 const API_KEY = process.env.NEXT_JUDGE0_API_KEY ?? null;
-// Accept common variants for RapidAPI env names to be forgiving
 const RAPIDAPI_KEY =
   process.env.NEXT_JUDGE0_RAPID_API_KEY ??
   process.env.NEXT_JUDGE0_RAPIDAPI_KEY ??
@@ -20,7 +15,6 @@ const RAPIDAPI_HOST =
   process.env.NEXT_JUDGE0_RAPID_APIHOST ??
   null;
 
-/** Build headers depending on which auth method is configured */
 function buildHeaders(): Record<string, string> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -35,7 +29,6 @@ function buildHeaders(): Record<string, string> {
   return headers;
 }
 
-/** Basic validation for submit payload. Keep it strict enough to avoid runtime surprises. */
 function validateSubmitPayload(body: SubmitBody | null): string | null {
   if (!body) return "Missing request body";
 
@@ -47,7 +40,6 @@ function validateSubmitPayload(body: SubmitBody | null): string | null {
   const lang = body.language_id;
   if (lang === undefined || lang === null) return "Missing language_id";
 
-  // language_id can be a number or a numeric string; coerce check
   if (
     !(
       typeof lang === "number" ||
@@ -60,10 +52,8 @@ function validateSubmitPayload(body: SubmitBody | null): string | null {
   return null;
 }
 
-/** POST -> submit code to Judge0 */
 export async function POST(req: NextRequest) {
   try {
-    // runtime check for BASE
     if (!BASE) {
       return NextResponse.json(
         { error: "Server misconfigured: NEXT_JUDGE0_BASE_URL not set" },
@@ -77,14 +67,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: validationError }, { status: 400 });
     }
 
-    // default options
     const wait = body?.wait === undefined ? false : Boolean(body?.wait);
     const base64 =
       body?.base64_encoded === undefined
         ? false
         : Boolean(body?.base64_encoded);
 
-    // build query string
     const qs = new URLSearchParams({
       base64_encoded: String(base64),
       wait: String(wait),
@@ -100,7 +88,6 @@ export async function POST(req: NextRequest) {
 
     const data = await res.json();
 
-    // forward status and JSON body
     return NextResponse.json(data, { status: res.status });
   } catch (err: unknown) {
     console.error("Judge0 proxy POST error", err);
@@ -114,7 +101,6 @@ export async function POST(req: NextRequest) {
   }
 }
 
-/** GET -> fetch result by token. Query param: token */
 export async function GET(req: NextRequest) {
   try {
     if (!BASE) {
@@ -133,7 +119,6 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // optionally allow base64_encoded param
     const base64 = urlObj.searchParams.get("base64_encoded") || "false";
 
     const url = `${BASE.replace(/\/+$/, "")}/submissions/${encodeURIComponent(
