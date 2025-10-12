@@ -6,6 +6,7 @@ import Navbar from "@/components/navbar";
 import { Toaster } from "@/components/ui/sonner";
 import { isServerLoggedIn } from "@/lib/auth-server";
 import ClientWrapper from "@/components/client-wrapper";
+import RegisterWake from "@/components/registerWake";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,6 +32,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  <RegisterWake />;
   const isLoggedIn = await isServerLoggedIn();
 
   return (

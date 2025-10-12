@@ -10,6 +10,10 @@ const ORIGINS = (process.env.ALLOWED_ORIGINS || "http://localhost:3000").split(
 const app = express();
 app.get("/", (req, res) => res.send("Socket.IO server running"));
 
+app.get("/wake", (req, res) => {
+  res.status(200).send("OK");
+});
+
 const server = http.createServer(app);
 
 const io = new Server(server, {
