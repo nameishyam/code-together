@@ -148,15 +148,16 @@ export default function MonacoEditor({
     setRemoteCursors({});
 
     const setupSocket = async () => {
-      try {
-        await fetch("/api/socket");
-      } catch (error) {
-        console.error("socket.io init failed", error);
-        return;
-      }
       if (!isActive) return;
 
-      const socket = io({ path: "/socket.io" });
+      const socketUrl =
+        process.env.NEXT_PUBLIC_SOCKET_URL ||
+        window.location.origin.replace(/^http/, "http");
+      const socket = io(socketUrl, {
+        path: "/socket.io",
+        transports: ["websocket", "polling"],
+        withCredentials: true,
+      });
       socketRef.current = socket;
 
       socket.on("connect", () => {
