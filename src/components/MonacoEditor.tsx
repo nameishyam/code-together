@@ -3,9 +3,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import type { editor } from "monaco-editor";
-
-const Editor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
-
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -16,9 +13,10 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-
 import { io, Socket } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
+
+const Editor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
 
 export type MonacoEditorProps = {
   initialLanguage?:
@@ -88,7 +86,7 @@ export default function MonacoEditor({
   const socketRef = useRef<Socket | null>(null);
   const clientIdRef = useRef<string | null>(null);
   const colorRef = useRef<string | null>(null);
-  const isRemoteUpdateRef = useRef(false); // Prevent infinite loops
+  const isRemoteUpdateRef = useRef(false);
   const lastEmitRef = useRef<number>(0);
   const rafRef = useRef<number | null>(null);
 
