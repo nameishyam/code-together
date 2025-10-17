@@ -1,11 +1,11 @@
 "use client";
 
-import MonacoEditor from "@/components/MonacoEditor";
+import MonacoEditor from "@/components/editor/MonacoEditor";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import languageBoilerplates from "@/lib/langBoilerPlates";
+import languageBoilerplates from "@/utils/langBoilerPlates";
 
 export default function DashboardPage() {
   const [code, setCode] = useState<string>(`#include <stdio.h>
@@ -28,7 +28,7 @@ int main() {
   const [output, setOutput] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
-  function getLanguageId(lang: string) {
+  const getLanguageId = useCallback((lang: string) => {
     switch (lang) {
       case "python":
         return 71;
@@ -45,9 +45,9 @@ int main() {
       default:
         return 71;
     }
-  }
+  }, []);
 
-  async function runCode() {
+  const runCode = useCallback(async () => {
     setLoading(true);
     setOutput("");
     const body = {
@@ -70,9 +70,9 @@ int main() {
       setOutput("Error running code");
     }
     setLoading(false);
-  }
+  }, [code, language, getLanguageId]);
 
-  function handleSave() {
+  const handleSave = useCallback(() => {
     try {
       window.localStorage.setItem(`monaco:content:${language}`, code ?? "");
       window.localStorage.setItem(
@@ -80,19 +80,35 @@ int main() {
         new Date().toISOString()
       );
     } catch {}
-  }
+  }, [code, language]);
 
-  function handleReset() {
+  const handleReset = useCallback(() => {
     setCode("print('hello world')");
     try {
       window.localStorage.removeItem(`monaco:content:${language}`);
       window.localStorage.removeItem(`monaco:content:${language}:ts`);
     } catch {}
-  }
+  }, [language]);
+
+  const handleLanguageChange = useCallback((lang: typeof language) => {
+    if (!lang) return;
+    setLanguage(lang);
+    const defaultCode = languageBoilerplates[lang] || "";
+    setCode(defaultCode);
+  }, []);
+
+  // const handleCodeChange = useCallback((newCode: string) => {
+  //   setCode(newCode);
+  // }, []);
+
+  // const handleFontSizeChange = useCallback((size: number) => {
+  //   setFontSize(size);
+  // }, []);
 
   const params = useParams<{ id: string }>();
   const idParam = params?.id;
   const roomId = Array.isArray(idParam) ? idParam[0] : idParam;
+
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-2xl font-bold">Dashboard {roomId ?? ""}</h1>
@@ -114,12 +130,7 @@ int main() {
                 value={code}
                 onChange={setCode}
                 language={language}
-                onLanguageChange={(lang) => {
-                  if (!lang) return;
-                  setLanguage(lang);
-                  const defaultCode = languageBoilerplates[lang] || "";
-                  setCode(defaultCode);
-                }}
+                onLanguageChange={handleLanguageChange}
                 fontSize={fontSize}
                 onFontSizeChange={setFontSize}
                 onSave={handleSave}

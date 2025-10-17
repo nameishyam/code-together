@@ -5,7 +5,7 @@ import "./globals.css";
 import Navbar from "@/components/navbar";
 import { Toaster } from "@/components/ui/sonner";
 import { isServerLoggedIn } from "@/lib/auth-server";
-import ClientWrapper from "@/components/client-wrapper";
+import ClientWrapper from "@/hooks/client-wrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

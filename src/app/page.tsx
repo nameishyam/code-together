@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAuth } from "@/components/client-wrapper";
+import { useAuth } from "@/hooks/client-wrapper";
 import { toast } from "sonner";
 import Cookies from "js-cookie";
 
