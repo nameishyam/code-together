@@ -1,5 +1,3 @@
-// hooks/useEditorSocket.ts
-
 import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import type {
@@ -132,7 +130,6 @@ export const useEditorSocket = ({
     };
   }, [roomId, clientId, color, editorRef, isRemoteUpdateRef]);
 
-  // Clean up stale cursors
   useEffect(() => {
     const interval = setInterval(() => {
       const cutoff = Date.now() - 7000;
