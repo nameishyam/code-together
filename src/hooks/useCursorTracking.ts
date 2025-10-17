@@ -1,5 +1,3 @@
-// hooks/useCursorTracking.ts
-
 import { useEffect, useRef } from "react";
 import type { Socket } from "socket.io-client";
 import { clampValue } from "@/utils/editor.utils";

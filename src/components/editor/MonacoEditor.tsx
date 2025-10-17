@@ -33,13 +33,11 @@ export default function MonacoEditor({
   const { isLoggedIn } = useAuth();
   const user = getUser();
 
-  // Initialize client ID and color with lazy initialization
   const [clientId] = useState<string>(() =>
     generateClientId(isLoggedIn, user as User | null)
   );
   const [color] = useState<string>(() => generateRandomColor());
 
-  // Socket connection and remote cursors
   const { socketRef, remoteCursors } = useEditorSocket({
     roomId,
     clientId,
@@ -48,7 +46,6 @@ export default function MonacoEditor({
     isRemoteUpdateRef,
   });
 
-  // Cursor tracking
   useCursorTracking({
     roomId,
     containerRef,

@@ -97,14 +97,6 @@ int main() {
     setCode(defaultCode);
   }, []);
 
-  // const handleCodeChange = useCallback((newCode: string) => {
-  //   setCode(newCode);
-  // }, []);
-
-  // const handleFontSizeChange = useCallback((size: number) => {
-  //   setFontSize(size);
-  // }, []);
-
   const params = useParams<{ id: string }>();
   const idParam = params?.id;
   const roomId = Array.isArray(idParam) ? idParam[0] : idParam;
