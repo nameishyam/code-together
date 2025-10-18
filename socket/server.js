@@ -3,9 +3,7 @@ import http from "http";
 import { Server } from "socket.io";
 
 const PORT = process.env.PORT || 4000;
-const ORIGINS = (process.env.ALLOWED_ORIGINS || "http://localhost:3000").split(
-  ","
-);
+const ORIGINS = "*";
 
 const app = express();
 app.get("/", (req, res) => res.send("Socket.IO server running"));
