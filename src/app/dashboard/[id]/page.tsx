@@ -62,9 +62,14 @@ int main() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
+      console.log(res.status);
       const result = await res.json();
       setOutput(
-        result.stdout || result.stderr || result.compile_output || "No output"
+        result.stdout ||
+          result.stderr ||
+          result.compile_output ||
+          result.message ||
+          "No output"
       );
     } catch {
       setOutput("Error running code");

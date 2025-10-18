@@ -29,7 +29,6 @@ const SUPPORTED_LANGUAGES: Judge0Language[] = [
   },
 ];
 
-// GET -> return hardcoded supported languages
 export async function GET() {
   try {
     return NextResponse.json(SUPPORTED_LANGUAGES, { status: 200 });
