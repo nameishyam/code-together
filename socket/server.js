@@ -9,7 +9,7 @@ const app = express();
 app.get("/", (req, res) => res.send("Socket.IO server running"));
 
 app.get("/wake", (req, res) => {
-  res.status(200).send("OK");
+  res.status(200).send("OK the server has started");
 });
 
 const server = http.createServer(app);
